@@ -1,22 +1,22 @@
 package com.xkl.csvtest.dtos;
 
 import com.xkl.csvtest.database.employee.Employee;
-import com.xkl.csvtest.database.employee.EmployeeAddress;
 
 public class EmployeeDto {
     private String document;
     private String name;
     private String postalCode;
     private String companyDocument;
-    private EmployeeAddress address;
+    private AddressDto address;
 
     public EmployeeDto() {}
 
-    public EmployeeDto(String document, String name, String postalCode, String companyDocument) {
+    public EmployeeDto(String document, String name, String postalCode, String companyDocument, AddressDto address) {
         this.setDocument(document);
         this.setName(name);
         this.setPostalCode(postalCode);
         this.setCompanyDocument(companyDocument);
+        this.setAddress(address);
     }
 
     public EmployeeDto(Employee employee) {
@@ -25,11 +25,11 @@ public class EmployeeDto {
         this.setPostalCode(employee.getPostalCode());
         this.setCompanyDocument(employee.getCompanyDocument());
         this.setAddress(
-                new EmployeeAddress(employee.getUf(),
-                        employee.getCity(),
-                        employee.getNeighbourhood(),
-                        employee.getAddress(),
-                        employee.getComplement()));
+                new AddressDto(employee.getAddress().getUf(),
+                        employee.getAddress().getCity(),
+                        employee.getAddress().getNeighbourhood(),
+                        employee.getAddress().getPlace(),
+                        employee.getAddress().getComplement()));
     }
 
     public String getDocument() {
@@ -64,11 +64,11 @@ public class EmployeeDto {
         this.companyDocument = companyDocument;
     }
 
-    public EmployeeAddress getAddress() {
+    public AddressDto getAddress() {
         return address;
     }
 
-    public void setAddress(EmployeeAddress address) {
+    public void setAddress(AddressDto address) {
         this.address = address;
     }
 }

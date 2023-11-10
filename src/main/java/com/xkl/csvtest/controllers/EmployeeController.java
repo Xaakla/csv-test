@@ -28,27 +28,27 @@ public class EmployeeController {
 
     @PostMapping
     public EmployeeDto addEmployee(@RequestParam String name,
-                                                          @RequestParam String document,
-                                                          @RequestParam String postalCode,
-                                                          @RequestParam String companyDocument) {
-         return employeeService.addEmployee(name, document, postalCode, companyDocument);
+                                   @RequestParam String document,
+                                   @RequestParam String postalCode,
+                                   @RequestParam String companyDocument) {
+        return employeeService.addEmployee(name, document, postalCode, companyDocument);
     }
 
     @PatchMapping("/{document}/edit/name")
     public EmployeeDto editEmployeeName(@PathVariable String document,
-                                     @RequestParam String name) {
+                                        @RequestParam String name) {
         return employeeService.editEmployeeName(document, name);
     }
 
     @PatchMapping("/{document}/edit/postalCode")
     public EmployeeDto editEmployeePostalCode(@PathVariable String document,
-                                         @RequestParam String postalCode) {
+                                              @RequestParam String postalCode) {
         return employeeService.editEmployeePostalCode(document, postalCode);
     }
 
     @PatchMapping("/{document}/edit/companyDocument")
     public EmployeeDto editEmployeeCompanyDocument(@PathVariable String document,
-                                           @RequestParam String companyDocument) {
+                                                   @RequestParam String companyDocument) {
         return employeeService.editEmployeeCompanyDocument(document, companyDocument);
     }
 

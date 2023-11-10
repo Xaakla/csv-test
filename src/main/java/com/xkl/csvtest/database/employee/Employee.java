@@ -1,15 +1,18 @@
 package com.xkl.csvtest.database.employee;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import com.xkl.csvtest.dtos.AddressDto;
+import com.xkl.csvtest.dtos.EmployeeDto;
+import jakarta.persistence.*;
 
 @Entity
-public class Employee extends EmployeeAddress {
+public class Employee {
     @Id
     private String document;
     private String name;
     private String postalCode;
     private String companyDocument;
+    @OneToOne
+    private Address address;
 
     public Employee() {
     }
@@ -19,18 +22,13 @@ public class Employee extends EmployeeAddress {
             String name,
             String postalCode,
             String companyDocument,
-            String uf, String city, String neighbourhood, String address, String complement
+            Address address
     ) {
-        super();
         this.name = name;
         this.document = document;
         this.postalCode = postalCode;
         this.companyDocument = companyDocument;
-        this.setUf(uf);
-        this.setCity(city);
-        this.setNeighbourhood(neighbourhood);
-        this.setAddress(address);
-        this.setComplement(complement);
+        this.address = address;
     }
 
     public String getDocument() {
@@ -63,5 +61,13 @@ public class Employee extends EmployeeAddress {
 
     public void setCompanyDocument(String companyDocument) {
         this.companyDocument = companyDocument;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
     }
 }

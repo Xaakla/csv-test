@@ -2,7 +2,9 @@ package com.xkl.csvtest.services;
 
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReaderBuilder;
+import com.xkl.csvtest.database.employee.Address;
 import com.xkl.csvtest.database.employee.Employee;
+import com.xkl.csvtest.dtos.AddressDto;
 import com.xkl.csvtest.dtos.EmployeeDto;
 import com.xkl.csvtest.repository.EmployeeRepository;
 import jakarta.transaction.Transactional;
@@ -21,10 +23,12 @@ import static java.util.Map.entry;
 public class EmployeeService {
 
     private final EmployeeRepository employeeRepo;
+    private final AddressService addressService;
     private final PostalCodeService postalCodeService;
 
-    public EmployeeService(EmployeeRepository employeeRepo, PostalCodeService postalCodeService) {
+    public EmployeeService(EmployeeRepository employeeRepo, AddressService addressService, PostalCodeService postalCodeService) {
         this.employeeRepo = employeeRepo;
+        this.addressService = addressService;
         this.postalCodeService = postalCodeService;
     }
 
@@ -40,13 +44,9 @@ public class EmployeeService {
 
         var employeeAddress = postalCodeService.findAddressByPostalCode(postalCode);
 
-        var employee = new Employee(
-                document, name, postalCode, companyDocument,
-                employeeAddress.getUf(),
-                employeeAddress.getLocalidade(),
-                employeeAddress.getBairro(),
-                employeeAddress.getLogradouro(),
-                employeeAddress.getComplemento());
+        var address = new Address(employeeAddress);
+
+        var employee = new Employee(document, name, postalCode, companyDocument, address);
 
         return new EmployeeDto(employeeRepo.save(employee));
     }
@@ -67,11 +67,11 @@ public class EmployeeService {
 
         var employeeAddress = postalCodeService.findAddressByPostalCode(postalCode);
 
-        employee.setUf(employeeAddress.getUf());
-        employee.setCity(employeeAddress.getLocalidade());
-        employee.setNeighbourhood(employeeAddress.getBairro());
-        employee.setAddress(employeeAddress.getLogradouro());
-        employee.setComplement(employeeAddress.getComplemento());
+        employee.getAddress().setUf(employeeAddress.getUf());
+        employee.getAddress().setCity(employeeAddress.getLocalidade());
+        employee.getAddress().setNeighbourhood(employeeAddress.getBairro());
+        employee.getAddress().setPlace(employeeAddress.getLogradouro());
+        employee.getAddress().setComplement(employeeAddress.getComplemento());
         employee.setPostalCode(postalCode);
 
         return new EmployeeDto(employeeRepo.save(employee));
@@ -92,6 +92,7 @@ public class EmployeeService {
             throw new RuntimeException("Employee document " + document + " not found.");
         }
 
+        addressService.deleteAddress(employeeRepo.findByDocument(document).get().getAddress().getId());
         employeeRepo.deleteByDocument(document);
     }
 
@@ -118,7 +119,7 @@ public class EmployeeService {
                 List<Map<String, Object>> errorsInLine = new ArrayList<>();
                 EmployeeDto employee = parse(line);
 
-                if (currentLine.get() > 0)  {
+                if (currentLine.get() > 0) {
                     if (Optional.ofNullable(employee).isEmpty()) {
                         errors.add(of(
                                 "line", currentLine.get(),
@@ -171,16 +172,11 @@ public class EmployeeService {
 
         var employeesList = new ArrayList<Employee>();
         success.forEach((it) -> {
-            var employeeAddress = postalCodeService.findAddressByPostalCode(it.getPostalCode());
+            var addressFound = postalCodeService.findAddressByPostalCode(it.getPostalCode());
 
-            employeesList.add(
-                    new Employee(
-                            it.getDocument(), it.getName(), it.getPostalCode(), it.getCompanyDocument(),
-                            employeeAddress.getUf(),
-                            employeeAddress.getLocalidade(),
-                            employeeAddress.getBairro(),
-                            employeeAddress.getLogradouro(),
-                            employeeAddress.getComplemento()));
+            var address = addressService.addAddress(new AddressDto(addressFound));
+
+            employeesList.add(new Employee(it.getDocument(), it.getName(), it.getPostalCode(), it.getCompanyDocument(), address));
         });
 
         employeeRepo.saveAll(employeesList);
@@ -190,13 +186,15 @@ public class EmployeeService {
                 entry("errors", errors));
     }
 
-    private EmployeeDto parse(String[] line) {
+    @Transactional
+    public EmployeeDto parse(String[] line) {
         try {
             return new EmployeeDto(
                     Optional.of(line[0].replaceAll("[^0-9]", "").trim()).orElse(null),
                     Optional.of(line[1].trim()).orElse(""),
                     Optional.of(line[2].replaceAll("[^0-9]", "").trim()).orElse(null),
-                    Optional.of(line[3].replaceAll("[^0-9]", "").trim()).orElse(null));
+                    Optional.of(line[3].replaceAll("[^0-9]", "").trim()).orElse(null),
+                    new AddressDto());
         } catch (Exception e) {
             return null;
         }
