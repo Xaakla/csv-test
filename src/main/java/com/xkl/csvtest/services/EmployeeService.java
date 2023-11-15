@@ -2,16 +2,19 @@ package com.xkl.csvtest.services;
 
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReaderBuilder;
-import com.xkl.csvtest.database.employee.Address;
+import com.xkl.csvtest.database.employee.Company;
 import com.xkl.csvtest.database.employee.Employee;
 import com.xkl.csvtest.dtos.AddressDto;
+import com.xkl.csvtest.dtos.CompanyDto;
 import com.xkl.csvtest.dtos.EmployeeDto;
+import com.xkl.csvtest.repository.CompanyRepository;
 import com.xkl.csvtest.repository.EmployeeRepository;
 import jakarta.transaction.Transactional;
 import org.apache.commons.io.input.CharSequenceReader;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -23,13 +26,19 @@ import static java.util.Map.entry;
 public class EmployeeService {
 
     private final EmployeeRepository employeeRepo;
+    private final CompanyRepository companyRepository;
     private final AddressService addressService;
+    private final CompanyService companyService;
     private final PostalCodeService postalCodeService;
+    private final CNPJService cnpjService;
 
-    public EmployeeService(EmployeeRepository employeeRepo, AddressService addressService, PostalCodeService postalCodeService) {
+    public EmployeeService(EmployeeRepository employeeRepo, CompanyRepository companyRepository, AddressService addressService, CompanyService companyService, PostalCodeService postalCodeService, CNPJService cnpjService) {
         this.employeeRepo = employeeRepo;
+        this.companyRepository = companyRepository;
         this.addressService = addressService;
+        this.companyService = companyService;
         this.postalCodeService = postalCodeService;
+        this.cnpjService = cnpjService;
     }
 
     public Set<EmployeeDto> findAllEmployees() {
@@ -37,16 +46,22 @@ public class EmployeeService {
     }
 
     @Transactional
-    public EmployeeDto addEmployee(String name, String document, String postalCode, String companyDocument) {
+    public EmployeeDto addEmployee(String name, String document, String postalCode, String companyDocument) throws ParseException {
         if (employeeRepo.existsByDocument(document)) {
             throw new RuntimeException("Cannot add a new employee with the same document: " + document + ".");
         }
 
+        Company company;
+        if (companyRepository.existsByCnpj(companyDocument)) {
+            company = companyService.findCompanyByCnpj(companyDocument);
+        } else {
+            company = companyService.addCompany(new CompanyDto(cnpjService.findCompanyByCNPJ(companyDocument)));
+        }
+
         var employeeAddress = postalCodeService.findAddressByPostalCode(postalCode);
+        var address = addressService.addAddress(new AddressDto(employeeAddress));
 
-        var address = new Address(employeeAddress);
-
-        var employee = new Employee(document, name, postalCode, companyDocument, address);
+        var employee = new Employee(document, name, postalCode, companyDocument, address, company);
 
         return new EmployeeDto(employeeRepo.save(employee));
     }
@@ -78,21 +93,29 @@ public class EmployeeService {
     }
 
     @Transactional
-    public EmployeeDto editEmployeeCompanyDocument(String document, String companyDocument) {
+    public EmployeeDto editEmployeeCompanyDocument(String document, String companyDocument) throws ParseException {
         var employee = employeeRepo.findByDocument(document)
                 .orElseThrow(() -> new RuntimeException("Employee document " + document + " not found."));
 
+        Company company;
+
+        if (companyRepository.existsByCnpj(companyDocument)) {
+            company = companyService.findCompanyByCnpj(companyDocument);
+        } else {
+            company = companyService.addCompany(new CompanyDto(cnpjService.findCompanyByCNPJ(companyDocument)));
+        }
+
         employee.setCompanyDocument(companyDocument);
+        employee.setCompany(company);
         return new EmployeeDto(employeeRepo.save(employee));
     }
 
     @Transactional
     public void deleteEmployee(String document) {
-        if (!employeeRepo.existsByDocument(document)) {
-            throw new RuntimeException("Employee document " + document + " not found.");
-        }
+        var employee = employeeRepo.findByDocument(document)
+                .orElseThrow(() -> new RuntimeException("Employee document " + document + " not found."));
 
-        addressService.deleteAddress(employeeRepo.findByDocument(document).get().getAddress().getId());
+        addressService.deleteAddress(employee.getAddress().getId());
         employeeRepo.deleteByDocument(document);
     }
 
@@ -173,10 +196,17 @@ public class EmployeeService {
         var employeesList = new ArrayList<Employee>();
         success.forEach((it) -> {
             var addressFound = postalCodeService.findAddressByPostalCode(it.getPostalCode());
+            var companyFound = cnpjService.findCompanyByCNPJ(it.getCompanyDocument());
 
             var address = addressService.addAddress(new AddressDto(addressFound));
+            Company company;
+            try {
+                company = companyService.addCompany(new CompanyDto(companyFound));
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
 
-            employeesList.add(new Employee(it.getDocument(), it.getName(), it.getPostalCode(), it.getCompanyDocument(), address));
+            employeesList.add(new Employee(it.getDocument(), it.getName(), it.getPostalCode(), it.getCompanyDocument(), address, company));
         });
 
         employeeRepo.saveAll(employeesList);
@@ -194,7 +224,7 @@ public class EmployeeService {
                     Optional.of(line[1].trim()).orElse(""),
                     Optional.of(line[2].replaceAll("[^0-9]", "").trim()).orElse(null),
                     Optional.of(line[3].replaceAll("[^0-9]", "").trim()).orElse(null),
-                    new AddressDto());
+                    new AddressDto(), new CompanyDto());
         } catch (Exception e) {
             return null;
         }

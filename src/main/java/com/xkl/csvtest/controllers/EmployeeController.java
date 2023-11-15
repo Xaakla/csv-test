@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,9 +29,9 @@ public class EmployeeController {
 
     @PostMapping
     public EmployeeDto addEmployee(@RequestParam String name,
-                                   @RequestParam String document,
-                                   @RequestParam String postalCode,
-                                   @RequestParam String companyDocument) {
+                                      @RequestParam String document,
+                                      @RequestParam String postalCode,
+                                      @RequestParam String companyDocument) throws ParseException {
         return employeeService.addEmployee(name, document, postalCode, companyDocument);
     }
 
@@ -48,7 +49,7 @@ public class EmployeeController {
 
     @PatchMapping("/{document}/edit/companyDocument")
     public EmployeeDto editEmployeeCompanyDocument(@PathVariable String document,
-                                                   @RequestParam String companyDocument) {
+                                                   @RequestParam String companyDocument) throws ParseException {
         return employeeService.editEmployeeCompanyDocument(document, companyDocument);
     }
 

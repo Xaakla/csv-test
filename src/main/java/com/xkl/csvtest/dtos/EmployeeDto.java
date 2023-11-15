@@ -8,15 +8,17 @@ public class EmployeeDto {
     private String postalCode;
     private String companyDocument;
     private AddressDto address;
+    private CompanyDto company;
 
     public EmployeeDto() {}
 
-    public EmployeeDto(String document, String name, String postalCode, String companyDocument, AddressDto address) {
+    public EmployeeDto(String document, String name, String postalCode, String companyDocument, AddressDto address, CompanyDto company) {
         this.setDocument(document);
         this.setName(name);
         this.setPostalCode(postalCode);
         this.setCompanyDocument(companyDocument);
         this.setAddress(address);
+        this.setCompany(company);
     }
 
     public EmployeeDto(Employee employee) {
@@ -30,6 +32,7 @@ public class EmployeeDto {
                         employee.getAddress().getNeighbourhood(),
                         employee.getAddress().getPlace(),
                         employee.getAddress().getComplement()));
+        this.setCompany(new CompanyDto(employee.getCompany()));
     }
 
     public String getDocument() {
@@ -70,5 +73,13 @@ public class EmployeeDto {
 
     public void setAddress(AddressDto address) {
         this.address = address;
+    }
+
+    public CompanyDto getCompany() {
+        return company;
+    }
+
+    public void setCompany(CompanyDto company) {
+        this.company = company;
     }
 }

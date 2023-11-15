@@ -1,7 +1,6 @@
 package com.xkl.csvtest.database.employee;
 
 import com.xkl.csvtest.dtos.AddressDto;
-import com.xkl.csvtest.dtos.PostalCodeApiResult;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -18,22 +17,6 @@ public class Address {
     private String complement;
 
     public Address() {}
-
-    public Address(String uf, String city, String neighbourhood, String place, String complement) {
-        this.uf = uf;
-        this.city = city;
-        this.neighbourhood = neighbourhood;
-        this.place = place;
-        this.complement = complement;
-    }
-
-    public Address(PostalCodeApiResult postalCodeApiResult) {
-        this.uf = postalCodeApiResult.getUf();
-        this.city = postalCodeApiResult.getLocalidade();
-        this.neighbourhood = postalCodeApiResult.getBairro();
-        this.place = postalCodeApiResult.getLogradouro();
-        this.complement = postalCodeApiResult.getComplemento();
-    }
 
     public Address(AddressDto address) {
         this.uf = address.getUf();

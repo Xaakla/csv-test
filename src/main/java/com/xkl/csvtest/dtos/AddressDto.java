@@ -1,7 +1,5 @@
 package com.xkl.csvtest.dtos;
 
-import com.xkl.csvtest.database.employee.Address;
-
 public class AddressDto {
     private String uf;
     private String city;
@@ -18,14 +16,6 @@ public class AddressDto {
         this.neighbourhood = neighbourhood;
         this.place = place;
         this.complement = complement;
-    }
-
-    public AddressDto(Address address) {
-        this.uf = address.getUf();
-        this.city = address.getCity();
-        this.neighbourhood = address.getNeighbourhood();
-        this.place = address.getPlace();
-        this.complement = address.getComplement();
     }
 
     public AddressDto(PostalCodeApiResult postalCodeApiResult) {

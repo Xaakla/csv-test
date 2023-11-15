@@ -1,7 +1,5 @@
 package com.xkl.csvtest.database.employee;
 
-import com.xkl.csvtest.dtos.AddressDto;
-import com.xkl.csvtest.dtos.EmployeeDto;
 import jakarta.persistence.*;
 
 @Entity
@@ -14,6 +12,9 @@ public class Employee {
     @OneToOne
     private Address address;
 
+    @ManyToOne
+    private Company company;
+
     public Employee() {
     }
 
@@ -22,13 +23,15 @@ public class Employee {
             String name,
             String postalCode,
             String companyDocument,
-            Address address
+            Address address,
+            Company company
     ) {
         this.name = name;
         this.document = document;
         this.postalCode = postalCode;
         this.companyDocument = companyDocument;
         this.address = address;
+        this.company = company;
     }
 
     public String getDocument() {
@@ -69,5 +72,13 @@ public class Employee {
 
     public void setAddress(Address address) {
         this.address = address;
+    }
+
+    public Company getCompany() {
+        return company;
+    }
+
+    public void setCompany(Company company) {
+        this.company = company;
     }
 }
