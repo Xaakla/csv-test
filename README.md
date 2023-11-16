@@ -1,6 +1,9 @@
 # CSV Test
 - Projeto Spring Boot para ler arquivo .csv de funcionários e salvá-los em um banco de dados PostgreSQL
 
+## Link do projeto no GitHub
+- https://github.com/Xaakla/csv-test.git
+
 ## Como rodar no IntelliJ?
 - O sistema está rodando na porta 8070.
 - Crie um banco de dados PostgreSQL chamado "csvtest".
