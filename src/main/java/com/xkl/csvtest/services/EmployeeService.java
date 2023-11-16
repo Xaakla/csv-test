@@ -8,6 +8,7 @@ import com.xkl.csvtest.dtos.AddressDto;
 import com.xkl.csvtest.dtos.CompanyDto;
 import com.xkl.csvtest.dtos.EmployeeDto;
 import com.xkl.csvtest.dtos.EmployeeSimplifiedDto;
+import com.xkl.csvtest.exceptions.DefaultException;
 import com.xkl.csvtest.repository.CompanyRepository;
 import com.xkl.csvtest.repository.EmployeeRepository;
 import jakarta.transaction.Transactional;
@@ -48,13 +49,13 @@ public class EmployeeService {
 
     public EmployeeDto findEmployeeByDocument(String document) {
         return new EmployeeDto(employeeRepo.findByDocument(document)
-                .orElseThrow(() -> new RuntimeException("Could not find a employee with document " + document)));
+                .orElseThrow(() -> new DefaultException("Could not find a employee with document " + document)));
     }
 
     @Transactional
     public EmployeeDto addEmployee(String name, String document, String postalCode, String companyDocument) throws ParseException {
         if (employeeRepo.existsByDocument(document)) {
-            throw new RuntimeException("Cannot add a new employee with the same document: " + document + ".");
+            throw new DefaultException("Cannot add a new employee with the same document: " + document + ".");
         }
 
         Company company;
@@ -75,7 +76,7 @@ public class EmployeeService {
     @Transactional
     public EmployeeDto editEmployeeName(String document, String name) {
         var employee = employeeRepo.findByDocument(document)
-                .orElseThrow(() -> new RuntimeException("Employee document " + document + " not found."));
+                .orElseThrow(() -> new DefaultException("Employee document " + document + " not found."));
 
         employee.setName(name);
         return new EmployeeDto(employeeRepo.save(employee));
@@ -84,7 +85,7 @@ public class EmployeeService {
     @Transactional
     public EmployeeDto editEmployeePostalCode(String document, String postalCode) {
         var employee = employeeRepo.findByDocument(document)
-                .orElseThrow(() -> new RuntimeException("Employee document " + document + " not found."));
+                .orElseThrow(() -> new DefaultException("Employee document " + document + " not found."));
 
         var employeeAddress = postalCodeService.findAddressByPostalCode(postalCode);
 
@@ -101,7 +102,7 @@ public class EmployeeService {
     @Transactional
     public EmployeeDto editEmployeeCompanyDocument(String document, String companyDocument) throws ParseException {
         var employee = employeeRepo.findByDocument(document)
-                .orElseThrow(() -> new RuntimeException("Employee document " + document + " not found."));
+                .orElseThrow(() -> new DefaultException("Employee document " + document + " not found."));
 
         Company company;
 
@@ -119,7 +120,7 @@ public class EmployeeService {
     @Transactional
     public void deleteEmployee(String document) {
         var employee = employeeRepo.findByDocument(document)
-                .orElseThrow(() -> new RuntimeException("Employee document " + document + " not found."));
+                .orElseThrow(() -> new DefaultException("Employee document " + document + " not found."));
 
         addressService.deleteAddress(employee.getAddress().getId());
         employeeRepo.deleteByDocument(document);
@@ -195,8 +196,8 @@ public class EmployeeService {
             }
 
             reader.close();
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e.getCause());
+        } catch (DefaultException e) {
+            throw new DefaultException(e.getCause().getMessage());
         }
 
         var employeesList = new ArrayList<Employee>();
@@ -209,7 +210,7 @@ public class EmployeeService {
             try {
                 company = companyService.addCompany(new CompanyDto(companyFound));
             } catch (ParseException e) {
-                throw new RuntimeException(e);
+                throw new DefaultException(e.getMessage());
             }
 
             employeesList.add(new Employee(it.getDocument(), it.getName(), it.getPostalCode(), it.getCompanyDocument(), address, company));
@@ -246,6 +247,6 @@ public class EmployeeService {
                 "text/comma-separated-values",
                 "text/x-comma-separated-values",
                 "text/tab-separated-values").contains(contentType))
-            throw new RuntimeException("Invalid file format");
+            throw new DefaultException("Invalid file format");
     }
 }
