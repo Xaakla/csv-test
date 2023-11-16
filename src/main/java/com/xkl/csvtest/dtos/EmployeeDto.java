@@ -10,8 +10,6 @@ public class EmployeeDto {
     private AddressDto address;
     private CompanyDto company;
 
-    public EmployeeDto() {}
-
     public EmployeeDto(String document, String name, String postalCode, String companyDocument, AddressDto address, CompanyDto company) {
         this.setDocument(document);
         this.setName(name);

@@ -8,18 +8,6 @@ public class PostalCodeApiResult {
     private String localidade;
     private String uf;
 
-    public PostalCodeApiResult() {
-    }
-
-    public PostalCodeApiResult(String cep, String logradouro, String complemento, String bairro, String localidade, String uf) {
-        this.cep = cep;
-        this.logradouro = logradouro;
-        this.complemento = complemento;
-        this.bairro = bairro;
-        this.localidade = localidade;
-        this.uf = uf;
-    }
-
     public String getCep() {
         return cep;
     }

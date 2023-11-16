@@ -12,7 +12,7 @@ public class CompanyDto {
     private String tradingName;
     private String mainActivity;
     private String size;
-    private Double capital;
+    private String capital;
     private Date openingDate;
 
     public CompanyDto() {
@@ -24,7 +24,7 @@ public class CompanyDto {
         this.tradingName = companyApiResult.getFantasia();
         this.mainActivity = companyApiResult.getAtividadePrincipal().get(0).getText();
         this.size = companyApiResult.getPorte();
-        this.capital = Double.parseDouble(companyApiResult.getCapitalSocial());
+        this.capital = companyApiResult.getCapitalSocial();
         this.openingDate = new SimpleDateFormat("dd/MM/yyyy").parse(companyApiResult.getAbertura());
     }
 
@@ -78,11 +78,11 @@ public class CompanyDto {
         this.size = size;
     }
 
-    public Double getCapital() {
+    public String getCapital() {
         return capital;
     }
 
-    public void setCapital(Double capital) {
+    public void setCapital(String capital) {
         this.capital = capital;
     }
 

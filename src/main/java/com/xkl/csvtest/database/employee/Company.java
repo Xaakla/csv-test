@@ -17,7 +17,7 @@ public class Company {
     private String tradingName;
     private String mainActivity;
     private String size;
-    private Double capital;
+    private String capital;
     private Date openingDate;
 
     public Company() {
@@ -73,11 +73,11 @@ public class Company {
         this.size = size;
     }
 
-    public Double getCapital() {
+    public String getCapital() {
         return capital;
     }
 
-    public void setCapital(Double capital) {
+    public void setCapital(String capital) {
         this.capital = capital;
     }
 

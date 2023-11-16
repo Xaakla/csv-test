@@ -7,6 +7,7 @@ import com.xkl.csvtest.database.employee.Employee;
 import com.xkl.csvtest.dtos.AddressDto;
 import com.xkl.csvtest.dtos.CompanyDto;
 import com.xkl.csvtest.dtos.EmployeeDto;
+import com.xkl.csvtest.dtos.EmployeeSimplifiedDto;
 import com.xkl.csvtest.repository.CompanyRepository;
 import com.xkl.csvtest.repository.EmployeeRepository;
 import jakarta.transaction.Transactional;
@@ -43,6 +44,11 @@ public class EmployeeService {
 
     public Set<EmployeeDto> findAllEmployees() {
         return employeeRepo.findAll().stream().map(EmployeeDto::new).collect(Collectors.toSet());
+    }
+
+    public EmployeeDto findEmployeeByDocument(String document) {
+        return new EmployeeDto(employeeRepo.findByDocument(document)
+                .orElseThrow(() -> new RuntimeException("Could not find a employee with document " + document)));
     }
 
     @Transactional
@@ -125,7 +131,7 @@ public class EmployeeService {
 
         validateFileFormat(contentType);
 
-        List<EmployeeDto> success = new ArrayList<>();
+        List<EmployeeSimplifiedDto> success = new ArrayList<>();
         List<Map<String, Object>> errors = new ArrayList<>();
 
         try {
@@ -182,7 +188,7 @@ public class EmployeeService {
                         errors.add(of("line", currentLine.get(), "errors", errorsInLine, "document", employee.getDocument(), "name", employee.getName()));
                         continue;
                     }
-                    success.add(employee);
+                    success.add(new EmployeeSimplifiedDto(employee));
                 }
 
                 currentLine.incrementAndGet();
@@ -216,7 +222,6 @@ public class EmployeeService {
                 entry("errors", errors));
     }
 
-    @Transactional
     public EmployeeDto parse(String[] line) {
         try {
             return new EmployeeDto(

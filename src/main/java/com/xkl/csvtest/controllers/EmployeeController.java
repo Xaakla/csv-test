@@ -27,6 +27,11 @@ public class EmployeeController {
         return employeeService.findAllEmployees();
     }
 
+    @GetMapping("/{document}")
+    public EmployeeDto findEmployeeByDocument(@PathVariable String document) {
+        return employeeService.findEmployeeByDocument(document);
+    }
+
     @PostMapping
     public EmployeeDto addEmployee(@RequestParam String name,
                                       @RequestParam String document,
