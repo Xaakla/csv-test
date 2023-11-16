@@ -4,6 +4,9 @@
 ## Link do projeto no GitHub
 - https://github.com/Xaakla/csv-test.git
 
+## Arquivo .csv
+- Na raiz do projeto tem um arquivo .csv para testar a aplicação
+
 ## Como rodar no IntelliJ?
 - O sistema está rodando na porta 8070.
 - Crie um banco de dados PostgreSQL chamado "csvtest".
